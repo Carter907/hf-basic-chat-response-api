@@ -1,5 +1,6 @@
 package com.carter.speers.phi3huggingfaceapi;
 
+import com.google.gson.Gson;
 import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.huggingface.HuggingfaceChatClient;
@@ -17,6 +18,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.Map;
 
 @RestController
@@ -39,10 +41,11 @@ public class GenerationController {
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(String.format("{ \"inputs\": \"%s\" }", message)))
                 .build();
+        record PromptResponse(String generated_text) {}
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        PromptResponse promptResponse = new Gson().fromJson(response.body(), PromptResponse[].class)[0];
+        System.out.println(promptResponse.generated_text);
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-
-        return response.body();
+        return promptResponse.generated_text;
     }
 }
